@@ -233,9 +233,20 @@ class TwbBundleFormRow extends \Zend\Form\View\Helper\FormRow
      */
     protected function renderHelpBlock(\Zend\Form\ElementInterface $oElement)
     {
-        return ($sHelpBlock = $oElement->getOption('help-block')) ? sprintf(
+        if (!$sHelpBlock = $oElement->getOption('help-block')) {
+            return '';
+        }
+
+        $sHelpBlock = ($oTranslator = $this->getTranslator()) ? $oTranslator->translate($sHelpBlock, $this->getTranslatorTextDomain()) : $sHelpBlock;
+
+        // Escape help block content unless we've disabled that
+        if (!$oElement->getOption('disable_html_escape_help_block')) {
+            $sHelpBlock = $this->getEscapeHtmlHelper()->__invoke($sHelpBlock);
+        }
+
+        return sprintf(
             self::$helpBlockFormat,
-            $this->getEscapeHtmlHelper()->__invoke(($oTranslator = $this->getTranslator()) ? $oTranslator->translate($sHelpBlock, $this->getTranslatorTextDomain()) : $sHelpBlock)
-        ) : '';
+            $sHelpBlock
+        );
     }
 }
