@@ -60,7 +60,24 @@ class TwbBundleFormCheckbox extends \Zend\Form\View\Helper\FormCheckbox
                     'value' => $oElement->getUncheckedValue(),
                 )), $sClosingBracket
             ) . $sElementContent;
-        return $oElement->getOption('disable-twb') ? $sElementContent : sprintf(self::$checkboxFormat, $sElementContent);
+        $renderedElement = $oElement->getOption('disable-twb') ? $sElementContent : sprintf(self::$checkboxFormat, $sElementContent);
+
+        if ($oElement->getMessages()) {
+            $renderer = $this->getView();
+            if (method_exists($renderer, 'plugin')) {
+                $elementErrors = $renderer->plugin('bs3_form_element_errors');
+                $renderedElement .= $elementErrors->render($oElement);
+            }
+            $oElement->setOptions(array('validation-state' => 'error') + $oElement->getOptions());
+        }
+
+        if ($oElement->getOption('validation-state')) {
+            $renderedElement = sprintf('<div class="has-%s">%s</div>',
+                $oElement->getOption('validation-state'),
+                $renderedElement);
+        }
+        return $renderedElement;
+
     }
 
 
