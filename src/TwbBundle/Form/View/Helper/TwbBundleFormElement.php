@@ -1,5 +1,8 @@
 <?php
 namespace TwbBundle\Form\View\Helper;
+
+use Zend\Form\ElementInterface as ElementInterface;
+
 class TwbBundleFormElement extends \Zend\Form\View\Helper\FormElement implements \Zend\I18n\Translator\TranslatorAwareInterface
 {
 
@@ -48,7 +51,13 @@ class TwbBundleFormElement extends \Zend\Form\View\Helper\FormElement implements
             } else $oElement->setAttribute('class', 'form-control');
         }
 
-        $sMarkup = $oElement instanceof \TwbBundle\Form\Element\StaticElement ? $this->getView()->formStatic()->render($oElement) : parent::render($oElement);
+        if ($oElement instanceof \TwbBundle\Form\Element\StaticElement) {
+            $sMarkup = $this->getView()->bs3FormStatic()->render($oElement);
+        } elseif ($oElement instanceof ElementInterface) {
+            $sMarkup = $this->renderShim($oElement);
+        } else {
+            $sMarkup = parent::render($element);
+        }
 
         //Addon prepend
         if ($aAddOnPrepend = $oElement->getOption('add-on-prepend')) $sMarkup = $this->renderAddOn($aAddOnPrepend) . $sMarkup;
@@ -203,5 +212,66 @@ class TwbBundleFormElement extends \Zend\Form\View\Helper\FormElement implements
     public function getTranslatorTextDomain()
     {
         return $this->translatorTextDomain;
+    }
+
+    /**
+     * This is pretty hacky. I promise I'll come back and fix this in the future.
+     * This does the same sort of specialization that Zend's FormElement::render() does, except with these bs3 helpers
+     * @param  ElementInterface $element
+     * @return string
+     */
+    public function renderShim(ElementInterface $element)
+    {
+        $renderer = $this->getView();
+        if (!method_exists($renderer, 'plugin')) {
+            // Bail early if renderer is not pluggable
+            return '';
+        }
+
+        if ($element instanceof Element\Button) {
+            $helper = $renderer->plugin('bs3_form_button');
+            return $helper($element);
+        }
+
+        if ($element instanceof Element\Checkbox) {
+            $helper = $renderer->plugin('bs3_form_checkbox');
+            return $helper($element);
+        }
+
+        if ($element instanceof Element\Collection) {
+            $helper = $renderer->plugin('bs3_form_collection');
+            return $helper($element);
+        }
+
+        if ($element instanceof Element\MultiCheckbox) {
+            $helper = $renderer->plugin('bs3_form_multi_checkbox');
+            return $helper($element);
+        }
+
+        if ($element instanceof Element\Radio) {
+            $helper = $renderer->plugin('bs3_form_radio');
+            return $helper($element);
+        }
+
+        $type = $element->getAttribute('type');
+
+        if ('checkbox' == $type) {
+            $helper = $renderer->plugin('bs3_form_checkbox');
+            return $helper($element);
+        }
+
+        if ('multi_checkbox' == $type) {
+            $helper = $renderer->plugin('bs3_form_multi_checkbox');
+            return $helper($element);
+        }
+
+        if ('radio' == $type) {
+            $helper = $renderer->plugin('bs3_form_radio');
+            return $helper($element);
+        }
+
+        // if none of those specific cases came up, we don't have a BS3 flavored view helper, so just do the normal zend jazz
+        return parent::render($element);
+
     }
 }

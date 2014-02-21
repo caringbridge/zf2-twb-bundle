@@ -70,7 +70,7 @@ class TwbBundleForm extends \Zend\Form\View\Helper\Form
                 $aOptions['twb-layout'] = $sFormLayout;
 	    		$oElement->setOptions($aOptions);
     		}
-    		$sFormContent .= $oElement instanceof \Zend\Form\FieldsetInterface?$oRenderer->formCollection($oElement):$oRenderer->formRow($oElement);
+    		$sFormContent .= $oElement instanceof \Zend\Form\FieldsetInterface ? $oRenderer->bs3FormCollection($oElement) : $oRenderer->bs3FormRow($oElement);
     	}
     	if ($bHasColumnSizes && $sFormLayout !== self::LAYOUT_HORIZONTAL) {
             $sFormContent = sprintf(self::$formRowFormat, $sFormContent);

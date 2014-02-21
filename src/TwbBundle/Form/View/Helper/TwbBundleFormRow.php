@@ -34,7 +34,7 @@ class TwbBundleFormRow extends \Zend\Form\View\Helper\FormRow
     	$sElementType = $oElement->getAttribute('type');
 
     	//Nothing to do for hidden elements which have no messages
-    	if( $sElementType === 'hidden' && !$oElement->getMessages()) {
+    	if ($sElementType === 'hidden' && !$oElement->getMessages()) {
     		return parent::render($oElement);
     	}
 
@@ -124,6 +124,7 @@ class TwbBundleFormRow extends \Zend\Form\View\Helper\FormRow
 
         //Render label
         $sLabelOpen = $sLabelClose = $sLabelContent = '';
+
         if ($sLabelContent = $this->renderLabel($oElement)) {
             //Multicheckbox elements have to be handled differently as the HTML standard does not allow nested labels. The semantic way is to group them inside a fieldset
             $sElementType = $oElement->getAttribute('type');
@@ -248,5 +249,60 @@ class TwbBundleFormRow extends \Zend\Form\View\Helper\FormRow
             self::$helpBlockFormat,
             $sHelpBlock
         );
+    }
+
+    /**
+     * This is a super-hacky work-around to make sure this module uses its own view helpers
+     * Neilime's library re-aliases all of zend's view helpers, which is great if you're only using his library
+     * However, we require access to vanilla zend view helpers so that ztbFormElement still works
+     * This type of thing is being done both here and in TwBundleFormElement.php::renderShim() method, because we call these different ways throughout the code base
+     * @todo Rearchitect this. Bad.
+     *
+     * @return FormElement
+     */
+    protected function getElementHelper()
+    {
+
+        $elementHelper = parent::getElementHelper();
+
+        if ($elementHelper && method_exists($this->view, 'plugin')) {
+
+            switch(get_class($elementHelper)) {
+                case 'Zend\Form\View\Helper\Form':
+                    $elementHelper = $this->view->plugin('bs3_form');
+                    break;
+                case 'Zend\Form\View\Helper\FormButton':
+                    $elementHelper = $this->view->plugin('bs3_form_button');
+                    break;
+                case 'Zend\Form\View\Helper\FormCheckbox':
+                    $elementHelper = $this->view->plugin('bs3_form_checkbox');
+                    break;
+                case 'Zend\Form\View\Helper\FormCollection':
+                    $elementHelper = $this->view->plugin('bs3_form_collection');
+                    break;
+                case 'Zend\Form\View\Helper\FormElement':
+                    $elementHelper = $this->view->plugin('bs3_form_element');
+                    break;
+                case 'Zend\Form\View\Helper\FormElementErrors':
+                    $elementHelper = $this->view->plugin('bs3_form_element_errors');
+                    break;
+                case 'Zend\Form\View\Helper\FormMultiCheckbox':
+                    $elementHelper = $this->view->plugin('bs3_form_multi_checkbox');
+                    break;
+                case 'Zend\Form\View\Helper\FormRadio':
+                    $elementHelper = $this->view->plugin('bs3_form_radio');
+                    break;
+                case 'Zend\Form\View\Helper\FormRow':
+                    $elementHelper = $this->view->plugin('bs3_form_row');
+                    break;
+                case 'Zend\Form\View\Helper\FormLabel':
+                    $elementHelper = $this->view->plugin('bs3_label');
+                    break;
+            }
+            $this->elementHelper = $elementHelper;
+
+        }
+
+        return $elementHelper;
     }
 }
