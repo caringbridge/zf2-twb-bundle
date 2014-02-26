@@ -89,7 +89,9 @@ class TwbBundleFormButton extends \Zend\Form\View\Helper\FormButton
             }
         }
 
-        $sButtonContent = $this->getEscapeHtmlHelper()->__invoke($sButtonContent);
+        if (!$oElement->getOption('disable_html_escape_label')) {
+            $sButtonContent = $this->getEscapeHtmlHelper()->__invoke($sButtonContent);
+        }
 
         //Glyphicon
         if ($aGlyphiconOptions) {
