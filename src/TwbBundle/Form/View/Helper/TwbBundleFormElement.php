@@ -233,13 +233,8 @@ class TwbBundleFormElement extends \Zend\Form\View\Helper\FormElement implements
             return $helper($element);
         }
 
-        if ($element instanceof \Zend\Form\Element\Checkbox) {
-            $helper = $renderer->plugin('bs3_form_checkbox');
-            return $helper($element);
-        }
-
-        if ($element instanceof \Zend\Form\Element\Collection) {
-            $helper = $renderer->plugin('bs3_form_collection');
+        if ($element instanceof \Zend\Form\Element\Radio) {
+            $helper = $renderer->plugin('bs3_form_radio');
             return $helper($element);
         }
 
@@ -248,8 +243,13 @@ class TwbBundleFormElement extends \Zend\Form\View\Helper\FormElement implements
             return $helper($element);
         }
 
-        if ($element instanceof \Zend\Form\Element\Radio) {
-            $helper = $renderer->plugin('bs3_form_radio');
+        if ($element instanceof \Zend\Form\Element\Checkbox) {
+            $helper = $renderer->plugin('bs3_form_checkbox');
+            return $helper($element);
+        }
+
+        if ($element instanceof \Zend\Form\Element\Collection) {
+            $helper = $renderer->plugin('bs3_form_collection');
             return $helper($element);
         }
 
